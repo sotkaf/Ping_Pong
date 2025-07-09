@@ -1,103 +1,103 @@
-'''🕹️ Το Ping Pong παιχνίδι – Τι φτιάχνουμε:
+from pygame import *  # Εισάγουμε όλα τα modules της βιβλιοθήκης pygame
 
-Δύο ρακέτες (paddles) που ελέγχονται από 2 παίκτες με διαφορετικά κουμπιά.
-Μια μπάλα που κινείται αυτόματα και αναπηδά.
-Όποιος χάσει τη μπάλα, χάνει το παιχνίδι.'''
+''' Κλάσεις που απαιτούνται για το παιχνίδι '''
 
-from pygame import *
-
+# Βασική κλάση για όλα τα sprites (εικόνες που κινούνται στην οθόνη)
 class GameSprite(sprite.Sprite):
-    def __init__(self, player_image, player_x, player_y, player_speed, width, height):
-        super().__init__()  # 🔁 Κληρονομούμε τις λειτουργίες της sprite.Sprite
-        self.image = transform.scale(image.load(player_image), (width, height))  # 📷 Φόρτωση και αλλαγή μεγέθους εικόνας
-        self.speed = player_speed
-        self.rect = self.image.get_rect()  # 🎯 Ορθογώνιο για τον χειρισμό θέσης και σύγκρουσης
-        self.rect.x = player_x
-        self.rect.y = player_y
-    def reset(self):
-        window.blit(self.image, (self.rect.x, self.rect.y))  # 🖼️ Εμφανίζει το sprite στο παράθυρο
+   def __init__(self, player_image, player_x, player_y, player_speed, wight, height):
+       super().__init__()
+       self.image = transform.scale(image.load(player_image), (wight, height))  # φορτώνει και προσαρμόζει το μέγεθος της εικόνας
+       self.speed = player_speed
+       self.rect = self.image.get_rect()  # δημιουργεί "κουτί" γύρω από την εικόνα (για κινήσεις/συγκρούσεις)
+       self.rect.x = player_x
+       self.rect.y = player_y
 
-# 🧑‍🚀 Κλάση για τους παίκτες με διαφορετικά κουμπιά
+   def reset(self):
+       window.blit(self.image, (self.rect.x, self.rect.y))  # εμφανίζει το sprite στην οθόνη
+
+
+# Παίκτης: μπορεί να κινείται πάνω/κάτω με το πληκτρολόγιο
 class Player(GameSprite):
-    def update_r(self):  # 🔼🔽 Για τον δεξί παίκτη (πάνω-κάτω με βελάκια)
-        keys = key.get_pressed()
-        if keys[K_UP] and self.rect.y > 5:
-            self.rect.y -= self.speed
-        if keys[K_DOWN] and self.rect.y < win_height - 80:
-            self.rect.y += self.speed
+   def update_r(self):  # έλεγχος για τον δεξί παίκτη (πάνω/κάτω βελάκια)
+       keys = key.get_pressed()
+       if keys[K_UP] and self.rect.y > 5:
+           self.rect.y -= self.speed
+       if keys[K_DOWN] and self.rect.y < win_height - 80:
+           self.rect.y += self.speed
 
-    def update_l(self):  # 🔼🔽 Για τον αριστερό παίκτη (με W/S)
-        keys = key.get_pressed()
-        if keys[K_w] and self.rect.y > 5:
-            self.rect.y -= self.speed
-        if keys[K_s] and self.rect.y < win_height - 80:
-            self.rect.y += self.speed
+   def update_l(self):  # έλεγχος για τον αριστερό παίκτη (W και S)
+       keys = key.get_pressed()
+       if keys[K_w] and self.rect.y > 5:
+           self.rect.y -= self.speed
+       if keys[K_s] and self.rect.y < win_height - 80:
+           self.rect.y += self.speed
 
-# 🎮 Ρυθμίσεις παιχνιδιού
-back = (200, 255, 255)  # 🎨 Χρώμα φόντου (γαλάζιο)
+
+# Ρυθμίσεις παραθύρου
+back = (200, 255, 255)  # χρώμα φόντου RGB
 win_width = 600
 win_height = 500
-window = display.set_mode((win_width, win_height))  # 🖥️ Μέγεθος παραθύρου
+window = display.set_mode((win_width, win_height))  # δημιουργεί παράθυρο
 window.fill(back)
 
-# ⏯️ Μεταβλητές ελέγχου παιχνιδιού
+# Flags κατάστασης παιχνιδιού
 game = True
 finish = False
 clock = time.Clock()
-FPS = 60  # ⏱️ Πόσες φορές ανά δευτερόλεπτο ανανεώνεται η οθόνη
+FPS = 60  # 60 καρέ ανά δευτερόλεπτο
 
+# Δημιουργία ρακέτας και μπάλας
+racket1 = Player('racket.png', 30, 200, 4, 50, 150)   # αριστερός παίκτης
+racket2 = Player('racket.png', 520, 200, 4, 50, 150)  # δεξιός παίκτης
+ball = GameSprite('tenis_ball.png', 200, 200, 4, 50, 50)  # μπάλα
 
-# 🏓 Δημιουργία ρακέτας και μπάλας
-racket1 = Player('racket.png', 30, 200, 4, 50, 150)
-racket2 = Player('racket.png', 520, 200, 4, 50, 150)
-ball = GameSprite('tenis_ball.png', 200, 200, 4, 50, 50)
-
-# 🆘 Μηνύματα ήττας
+# Γραμματοσειρές για ήττα
 font.init()
 font = font.Font(None, 35)
-lose1 = font.render('PLAYER 1 LOSE!', True, (180, 0, 0))
-lose2 = font.render('PLAYER 2 LOSE!', True, (180, 0, 0))
+lose1 = font.render('PLAYER 1 LOSE!', True, (180, 0, 0))  # μήνυμα ήττας για παίκτη 1
+lose2 = font.render('PLAYER 2 LOSE!', True, (180, 0, 0))  # μήνυμα ήττας για παίκτη 2
 
-# 🏐 Ταχύτητα μπάλας
+# Ταχύτητα μπάλας
 speed_x = 3
 speed_y = 3
 
-# 🔁 Κύριος βρόχος παιχνιδιού
+# Κύριος βρόχος παιχνιδιού
 while game:
-    for e in event.get():
-        if e.type == QUIT:
-            game = False  # ⛔ Τέλος παιχνιδιού αν κλείσει το παράθυρο
+   for e in event.get():
+       if e.type == QUIT:
+           game = False  # έξοδος από το παιχνίδι
 
-    if not finish:
-        window.fill(back)  # 🧼 Καθαρίζει την οθόνη
-        racket1.update_l()  # 🔼🔽 Ενημερώνει αριστερή ρακέτα
-        racket2.update_r()  # 🔼🔽 Ενημερώνει δεξιά ρακέτα
-        ball.rect.x += speed_x
-        ball.rect.y += speed_y
+   if not finish:
+       window.fill(back)  # καθαρίζει την οθόνη
+       racket1.update_l()  # ενημέρωση αριστερής ρακέτας
+       racket2.update_r()  # ενημέρωση δεξιάς ρακέτας
 
-        # ⚽ Αναπήδηση όταν η μπάλα χτυπήσει ρακέτες
-        if sprite.collide_rect(racket1, ball) or sprite.collide_rect(racket2, ball):
-            speed_x *= -1  # 🔁 Αντιστρέφει την κατεύθυνση
+       # Κίνηση μπάλας
+       ball.rect.x += speed_x
+       ball.rect.y += speed_y
 
-        # ⬆️⬇️ Αναπήδηση από πάνω/κάτω
-        if ball.rect.y > win_height - 50 or ball.rect.y < 0:
-            speed_y *= -1
+       # Αν η μπάλα ακουμπήσει ρακέτα, αναστροφή κατεύθυνσης
+       if sprite.collide_rect(racket1, ball) or sprite.collide_rect(racket2, ball):
+           speed_x *= -1  # αναστροφή οριζόντιας φοράς
 
-        # ❌ Παίκτης 1 χάνει
-        if ball.rect.x < 0:
-            finish = True
-            window.blit(lose1, (200, 200))
+       # Αν η μπάλα φτάσει σε πάνω ή κάτω όριο, αλλάζει κάθετη κατεύθυνση
+       if ball.rect.y > win_height - 50 or ball.rect.y < 0:
+           speed_y *= -1
 
-        # ❌ Παίκτης 2 χάνει
-        if ball.rect.x > win_width:
-            finish = True
-            window.blit(lose2, (200, 200))
+       # Αν η μπάλα περάσει αριστερά, χάνει ο παίκτης 1
+       if ball.rect.x < 0:
+           finish = True
+           window.blit(lose1, (200, 200))  # εμφάνιση μηνύματος
 
-        # 🖼️ Σχεδίαση όλων των αντικειμένων
-        racket1.reset()
-        racket2.reset()
-        ball.reset()
+       # Αν περάσει δεξιά, χάνει ο παίκτης 2
+       if ball.rect.x > win_width:
+           finish = True
+           window.blit(lose2, (200, 200))
 
-    display.update()  # 🔄 Ενημερώνει την οθόνη
-    clock.tick(FPS)   # ⏱️ Περιμένει για το επόμενο frame
+       # Επανασχεδίαση αντικειμένων
+       racket1.reset()
+       racket2.reset()
+       ball.reset()
 
+   display.update()  # ανανέωση οθόνης
+   clock.tick(FPS)   # καθυστέρηση για σταθερό FPS
